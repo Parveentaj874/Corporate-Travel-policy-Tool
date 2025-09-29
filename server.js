@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./modules");
 const express = require("express");
 const sequelize = require("./config/db");
 
@@ -10,6 +11,8 @@ app.use("/api/travel", require("./routes/travelRoutes"));
 app.use("/api/policy", require("./routes/policyRoutes"));
 app.use("/api/approval", require("./routes/approvalRoutes"));
 app.use("/api/safety", require("./routes/safetyRoutes"));
+app.use("/api/auth", require("./routes/authRoutes"));
+
 
 
 // Test route

@@ -13,10 +13,11 @@ app.use("/api/approval", require("./routes/approvalRoutes"));
 app.use("/api/safety", require("./routes/safetyRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 
-
+const approvalRoutes= require("./routes/approvalRoutes");
+const policyRoutes = require("./routes/policyRoutes");
 
 // Test route
-app.get("/", (req, res) => res.send("Corporate Travel  App Backend Running"));
+app.get("/", (req, res) => res.send("Corporate Travel App Backend Running"));
 
 // Start server
 const PORT = process.env.PORT || 5000;

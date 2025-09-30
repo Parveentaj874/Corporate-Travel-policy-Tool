@@ -1,8 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const travelController = require("../controllers/travelController");
+const {
+  createTravel,
+  getAllTravels,
+} = require("../controllers/travelController");
+const { authMiddleware, roleMiddleware } = require("../middleware/authMiddleware");
 
-router.post("/", travelController.createTravel);
-router.get("/", travelController.getAllTravels);
+// Admin (or manager) creates travel
+router.post("/", authMiddleware, roleMiddleware(["admin"]), createTravel);
+
+// Any logged-in user can list travels (optional: restrict to admin/manager)
+router.get("/", authMiddleware, getAllTravels);
 
 module.exports = router;

@@ -1,11 +1,6 @@
-// const express = require("express");
-// const router = express.Router();
-// const policyController = require("../controllers/policyController");
 
-// router.post("/", policyController.createPolicy);
-// router.get("/", policyController.getAllPolicies);
 
-// module.exports = router;
+// routes/policyRoutes.js
 const express = require("express");
 const {
   createPolicy,
@@ -17,7 +12,6 @@ const {
 const { authMiddleware, roleMiddleware } = require("../middleware/authMiddleware");
 
 const router = express.Router();
-
 // CRUD routes
 router.post("/create", authMiddleware, roleMiddleware(["admin"]), createPolicy);
 router.get("/list", authMiddleware, getPolicies);

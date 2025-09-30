@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../modules");
 
+// Register new user
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role, department } = req.body;
@@ -31,6 +32,7 @@ exports.register = async (req, res) => {
   }
 };
 
+// Login user
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -50,6 +52,20 @@ exports.login = async (req, res) => {
     res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
   } catch (err) {
     console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get logged-in user info
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] }, // hide password
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    console.error("GetMe error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

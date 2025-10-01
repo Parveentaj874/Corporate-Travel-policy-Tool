@@ -1,3 +1,4 @@
+// controllers/approvalController.js
 const Approval = require("../modules/approval/approval.model");
 
 exports.createApproval = async (req, res) => {
@@ -8,7 +9,7 @@ exports.createApproval = async (req, res) => {
       status: req.body.status,
       comments: req.body.comments,
     });
-    res.status(201).json(approval);
+    res.status(201).json({message:'Approval ${id} processed'});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create approval" });

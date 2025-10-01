@@ -1,3 +1,4 @@
+// routes/approvalRoutes.js
 const express = require("express");
 const router = express.Router();
 const approvalController = require("../controllers/approvalController");

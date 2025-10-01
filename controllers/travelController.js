@@ -1,21 +1,48 @@
-const Travel = require("../modules/travel/travel.model");
+// controllers/travelController.js
+const { Travel, Policy } = require("../modules");
 
-exports.createTravel = async (req, res) => {
+exports.createTravelRequest = async (req, res) => {
   try {
-    const travel = await Travel.create(req.body);
-    res.status(201).json(travel);
+    const { destination, purpose, startDate, endDate, budget, policyId, emergencyContact } = req.body;
+
+    const policy = await Policy.findByPk(policyId);
+    if (!policy) return res.status(400).json({ message: "Invalid policy ID" });
+
+    const travel = await Travel.create({
+      employeeName: req.user.name, // employee name from token
+      destination,
+      purpose,
+      startDate,
+      endDate,
+      budget,
+      policyId,
+      emergencyContact,
+      userId: req.user.id,
+    });
+
+    res.status(201).json({ message: "Travel request submitted", travel });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create travel" });
+    console.error("Create Travel Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-exports.getAllTravels = async (req, res) => {
+exports.getMyTravelRequests = async (req, res) => {
   try {
-    const travels = await Travel.findAll();
+    const travels = await Travel.findAll({ where: { userId: req.user.id } });
     res.json(travels);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch travels" });
+    console.error("Get My Travels Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getAllTravelRequests = async (req, res) => {
+  try {
+    const travels = await Travel.findAll({ include: [Policy] });
+    res.json(travels);
+  } catch (err) {
+    console.error("Get All Travels Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };

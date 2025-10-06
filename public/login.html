@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -353,75 +353,74 @@
   </div>
 
   <script>
-    const loginForm = document.getElementById('loginForm');
-    const loginBtn = document.getElementById('loginBtn');
-    const alertBox = document.getElementById('alertBox');
+  const loginForm = document.getElementById('loginForm');
+  const loginBtn = document.getElementById('loginBtn');
+  const alertBox = document.getElementById('alertBox');
 
-    function showAlert(message, type) {
-      alertBox.textContent = message;
-      alertBox.className = `alert alert-${type} show`;
-      
-      if (type === 'success') {
-        setTimeout(() => {
-          alertBox.classList.remove('show');
-        }, 3000);
-      }
+  // Function to show alert messages
+  function showAlert(message, type) {
+    alertBox.textContent = message;
+    alertBox.className = `alert alert-${type} show`;
+    
+    if (type === 'success') {
+      setTimeout(() => {
+        alertBox.classList.remove('show');
+      }, 3000);
     }
+  }
 
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const rememberMe = document.getElementById('rememberMe').checked;
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      // Disable button and show loading state
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Logging in...';
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
 
-      try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
 
-        const data = await response.json();
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', { // ✅ Correct backend URL
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-        if (response.ok) {
-          // Store token and user data
-          const storage = rememberMe ? localStorage : sessionStorage;
-          storage.setItem('token', data.token);
-          storage.setItem('user', JSON.stringify(data.user));
+      const data = await response.json();
 
-          showAlert(`✅ Login successful! Welcome, ${data.user.name}`, 'success');
+      if (response.ok) {
+        // Save token and user data
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem('token', data.token);
+        storage.setItem('user', JSON.stringify(data.user || { name: 'User' }));
 
-          // Redirect to dashboard after 1.5 seconds
-          setTimeout(() => {
-            window.location.href = '/dashboard.html';
-          }, 1500);
+        showAlert(`✅ Login successful! Welcome, ${data.user?.name || 'User'}`, 'success');
 
-        } else {
-          showAlert(`❌ ${data.message || 'Login failed. Please check your credentials.'}`, 'error');
-          loginBtn.disabled = false;
-          loginBtn.textContent = 'Login';
-        }
-
-      } catch (error) {
-        console.error('Login error:', error);
-        showAlert('❌ Connection error. Please try again.', 'error');
+        // Redirect after login
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 1500);
+      } else {
+        showAlert(`❌ ${data.message || 'Login failed. Please check your credentials.'}`, 'error');
         loginBtn.disabled = false;
         loginBtn.textContent = 'Login';
       }
-    });
+    } catch (error) {
+      console.error('Login error:', error);
+      showAlert('❌ Connection error. Please try again.', 'error');
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login';
+    }
+  });
 
-    // Handle "Forgot Password" click
-    document.querySelector('.forgot-password').addEventListener('click', (e) => {
-      e.preventDefault();
-      showAlert('Password reset functionality coming soon!', 'error');
-    });
-  </script>
+  // Forgot password alert
+  document.querySelector('.forgot-password').addEventListener('click', (e) => {
+    e.preventDefault();
+    showAlert('Password reset functionality coming soon!', 'error');
+  });
+</script>
+
 </body>
 </html>

@@ -43,13 +43,17 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
+    // ✅ Include "name" in JWT payload
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, role: user.role, name: user.name },
       process.env.JWT_SECRET || "supersecretkey",
       { expiresIn: "1d" }
     );
 
-    res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, role: user.role }
+    });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });

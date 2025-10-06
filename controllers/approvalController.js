@@ -1,27 +1,64 @@
 // controllers/approvalController.js
-const Approval = require("../modules/approval/approval.model");
+const { Approval, Travel, User } = require("../modules");
 
-exports.createApproval = async (req, res) => {
+// Approve or reject a travel request
+exports.approveRequest = async (req, res) => {
   try {
+    const { travelId, status, comments } = req.body;
+
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    // Create an approval record
     const approval = await Approval.create({
-      travelId: req.params.travelId,
-      approverId: req.body.approverId,
-      status: req.body.status,
-      comments: req.body.comments,
+      travelId,
+      approverId: req.user.id,
+      status,
+      comments,
     });
-    res.status(201).json({message:'Approval ${id} processed'});
+
+    // Update the travel status
+    await Travel.update({ status }, { where: { id: travelId } });
+
+    res.json({ message: "Approval recorded", approval });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create approval" });
+    console.error("Approval error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-exports.getApprovalsByTravel = async (req, res) => {
+// Get approvals made by the logged-in manager/admin
+exports.getMyApprovals = async (req, res) => {
   try {
-    const approvals = await Approval.findAll({ where: { travelId: req.params.travelId } });
+    const approvals = await Approval.findAll({
+      where: { approverId: req.user.id },
+      include: [
+        { model: Travel, attributes: ["employeeName", "destination", "purpose", "status"] },
+        { model: User, attributes: ["name", "role"] }
+      ]
+    });
+
     res.json(approvals);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch approvals" });
+    console.error("GetMyApprovals error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getAllApprovals = async (req, res) => {
+  try {
+    const approvals = await Approval.findAll({
+      include: [
+        { model: Travel, attributes: ["employeeName", "destination", "purpose", "status"] },
+        { model: User, attributes: ["name", "role"] }
+      ],
+      order: [["createdAt", "DESC"]]
+    });
+
+    res.json(approvals);
+  } catch (err) {
+    console.error("GetAllApprovals error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
